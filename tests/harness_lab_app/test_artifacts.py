@@ -2,9 +2,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
 from sqlmodel import Session, SQLModel, create_engine
 
 from harness_lab_app.artifact_service import ArtifactService
+
+pytestmark = pytest.mark.integration
 
 
 def make_session() -> Session:

@@ -17,6 +17,7 @@ which every row names.
 from __future__ import annotations
 
 from collections import defaultdict
+from statistics import median
 from typing import Any
 
 from sqlmodel import Session, select
@@ -152,7 +153,7 @@ def case_ranking(session: Session) -> list[dict[str, Any]]:
                     if group["checks_total"]
                     else None
                 ),
-                "median_minutes": minutes[len(minutes) // 2] if minutes else None,
+                "median_minutes": median(minutes) if minutes else None,
             }
         )
     rows.sort(

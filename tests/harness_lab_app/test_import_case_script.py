@@ -17,6 +17,8 @@ from sqlmodel import Session, SQLModel, create_engine, select
 
 from harness_lab_app.models import Case
 
+pytestmark = pytest.mark.integration
+
 # scripts/ is not a package; make import_case importable the same way it runs.
 _SCRIPTS = Path(__file__).resolve().parents[2] / "scripts"
 if str(_SCRIPTS) not in sys.path:

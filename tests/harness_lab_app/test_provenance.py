@@ -51,9 +51,15 @@ def test_hash_text_is_deterministic_and_prefixed():
 
 def test_hash_file_returns_none_for_missing(tmp_path: Path):
     assert hash_file(tmp_path / "nope.txt") is None
+
+
+def test_hash_file_tracks_the_actual_bytes(tmp_path: Path):
     target = tmp_path / "f.txt"
-    target.write_text("hi")
-    assert hash_file(target) == hash_file(target)
+    target.write_bytes(b"abc")
+    expected = "sha256:ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+    assert hash_file(target) == expected
+    target.write_bytes(b"abd")
+    assert hash_file(target) != expected
 
 
 def test_read_skill_hashes_maps_name_to_computed_hash(tmp_path: Path):

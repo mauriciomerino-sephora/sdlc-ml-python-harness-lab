@@ -18,7 +18,8 @@ gate to green.
 </role>
 
 <instructions>
-1. Apply the `generate_e2e_tests` skill for critical user/API/CLI/service flows.
+1. Apply `sensible_testing` to identify plausible defects and independent oracles;
+   use `generate_e2e_tests` for critical user/API/CLI/service flows.
 2. Cover the happy path plus the failure modes the change introduces.
 3. Run `make check` and fix test/quality failures until it passes.
 4. Keep tests deterministic; isolate fixtures under `tests/`.
@@ -35,6 +36,7 @@ gate to green.
 Always read and apply: `.github/architecture.md`, `.github/standards.md`, `.github/domain-boundaries.md`.
 
 ## Bound skills
+- `sensible_testing` — read `.github/skills/sensible_testing.md` before acting.
 - `generate_e2e_tests` — read `.github/skills/generate_e2e_tests.md` before acting.
 
 ## Tier

@@ -5,11 +5,14 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+import pytest
+
 from ml_python_base.skills_sync.cli import check_drift, main
 from ml_python_base.skills_sync.config import load_registry
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 REGISTRY = REPO_ROOT / "adapters/registry.toml"
+pytestmark = pytest.mark.integration
 
 
 def _seed_governed(root: Path) -> None:

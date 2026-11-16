@@ -6,7 +6,7 @@ mode: subagent
 tier: executor
 allowed_tools: [read, grep, edit, bash]
 governance: [architecture, standards, domain-boundaries]
-skills: [generate_e2e_tests]
+skills: [sensible_testing, generate_e2e_tests]
 delegates_to: []
 context_budget: medium
 ---
@@ -19,7 +19,8 @@ gate to green.
 </role>
 
 <instructions>
-1. Apply the `generate_e2e_tests` skill for critical user/API/CLI/service flows.
+1. Apply `sensible_testing` to identify plausible defects and independent oracles;
+   use `generate_e2e_tests` for critical user/API/CLI/service flows.
 2. Cover the happy path plus the failure modes the change introduces.
 3. Run `make check` and fix test/quality failures until it passes.
 4. Keep tests deterministic; isolate fixtures under `tests/`.

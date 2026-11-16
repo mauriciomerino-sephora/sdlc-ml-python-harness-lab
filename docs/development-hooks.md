@@ -39,6 +39,12 @@ before retrying. The commit-message hook enforces developer authorship.
   errors, and an empty test suite return failure. It no longer formats or fixes
   source files before testing; coverage artifacts are still written.
 - `make ci` runs the same strict gate used by the local quality hook and CI.
+- `make test-unit` selects tests without the `integration` marker.
+- `make test-integration` selects marked integration tests, including the real
+  hook runner, skills-sync CLI, database/file flows, and subprocess validation.
+  Unmarked tests remain in the
+  default unit selection; the marker describes an execution boundary, not a
+  claim that all integration scenarios have been implemented.
 - `make format` and `make fix` are explicit source-editing commands.
 
 Python development tools, uv, and Node/npm must be available. This check can take

@@ -492,6 +492,7 @@ def _run(commands: list[str]) -> dict:
     return service._run_objective(spec, "shell-run")
 
 
+@pytest.mark.integration
 def test_a_shell_command_that_succeeds_passes():
     objective = _run(['bash -c "echo hello"'])
 
@@ -499,6 +500,7 @@ def test_a_shell_command_that_succeeds_passes():
     assert objective["checks"][0]["exit_code"] == 0
 
 
+@pytest.mark.integration
 def test_a_shell_command_that_fails_fails():
     objective = _run(["bash -c 'exit 1'"])
 
@@ -506,6 +508,7 @@ def test_a_shell_command_that_fails_fails():
     assert objective["checks"][0]["exit_code"] == 1
 
 
+@pytest.mark.integration
 def test_both_streams_of_a_shell_command_are_captured():
     objective = _run(["bash -c 'echo to-stdout; echo to-stderr >&2'"])
     detail = objective["checks"][0]["detail"]
@@ -514,6 +517,7 @@ def test_both_streams_of_a_shell_command_are_captured():
     assert "to-stderr" in detail
 
 
+@pytest.mark.integration
 def test_a_shell_command_that_never_returns_is_inconclusive_not_failed(monkeypatch):
     """ADR-0048: a check that did not measure is not a failure.
 
@@ -532,6 +536,7 @@ def test_a_shell_command_that_never_returns_is_inconclusive_not_failed(monkeypat
     assert objective["checks"][0]["exit_code"] == 124
 
 
+@pytest.mark.integration
 def test_the_shell_test_loop_runs_every_script_in_the_tree(tmp_path):
     """talos's own suite, written the way its CLAUDE.md writes it."""
     suite = tmp_path / "tests"
@@ -546,6 +551,7 @@ def test_the_shell_test_loop_runs_every_script_in_the_tree(tmp_path):
     assert objective["passed"] is True, objective["checks"]
 
 
+@pytest.mark.integration
 def test_a_failing_script_in_the_loop_fails_the_whole_check(tmp_path):
     suite = tmp_path / "tests"
     suite.mkdir()
@@ -559,6 +565,7 @@ def test_a_failing_script_in_the_loop_fails_the_whole_check(tmp_path):
     assert objective["passed"] is False
 
 
+@pytest.mark.integration
 def test_a_command_runs_in_the_directory_it_names(tmp_path):
     (tmp_path / "marker.txt").write_text("here\n")
 
@@ -567,6 +574,7 @@ def test_a_command_runs_in_the_directory_it_names(tmp_path):
     assert objective["passed"] is True
 
 
+@pytest.mark.integration
 def test_a_command_using_bash_syntax_is_handed_to_bash_not_dash():
     """`/bin/sh` in the runner image is dash, which cannot parse `[[`.
 
@@ -592,12 +600,13 @@ def test_a_python_command_still_runs_under_sh_exactly_as_before():
     assert [command[0] for command in spec["commands"]] == ["sh", "sh", "sh"]
 
 
-def test_python_and_node_commands_still_execute_and_report():
+@pytest.mark.integration
+def test_python_and_shell_commands_still_execute_and_report():
     python = _run(["python3 -c 'print(1)'"])
-    node = _run(["sh -c 'exit 0'"])
+    shell = _run(["sh -c 'exit 0'"])
 
     assert python["passed"] is True
-    assert node["passed"] is True
+    assert shell["passed"] is True
 
 
 def test_the_validation_environment_carries_no_lab_secrets(monkeypatch, tmp_path):

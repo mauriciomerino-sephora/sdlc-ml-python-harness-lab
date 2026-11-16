@@ -59,7 +59,7 @@ def test_copy_strategy_writes_files_and_returns_hashes(tmp_path: Path) -> None:
 
     copied = tmp_path / ".agents/skills/alpha/SKILL.md"
     assert copied.is_file() and not copied.is_symlink()
-    assert copied.read_text(encoding="utf-8").startswith("---")
+    assert copied.read_bytes() == (tmp_path / ".github/skills/alpha.md").read_bytes()
     # Hash order is internal-first (alpha, beta) then external (ext).
     assert list(hashes.keys()) == ["alpha", "beta", "ext"]
 

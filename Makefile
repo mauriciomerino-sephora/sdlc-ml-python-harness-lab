@@ -152,7 +152,14 @@ test:
 test-unit:
 	@echo "🧪 Running unit tests..."
 	@if [ ! -d .venv ]; then make install; fi
-	@. $(VENV_DIR)/bin/activate && PYTHONPATH=${PWD}/src pytest tests/ -v
+	@. $(VENV_DIR)/bin/activate && PYTHONPATH=${PWD}/src pytest tests/ -m "not integration" -v
+
+# Deterministic integration tests; live Docker/model smoke checks stay separate.
+.PHONY: test-integration
+test-integration:
+	@echo "🧪 Running integration tests..."
+	@if [ ! -d .venv ]; then make install; fi
+	@. $(VENV_DIR)/bin/activate && PYTHONPATH=${PWD}/src pytest tests/ -m integration -v
 
 # =============================================================================
 # OPENCODE RUNTIME (self-hosted / cloud, configured via .env)
@@ -956,6 +963,7 @@ help:
 	@echo "Testing:"
 	@echo "  make test                 Run all tests with coverage"
 	@echo "  make test-unit            Run unit tests only"
+	@echo "  make test-integration     Run marked integration tests"
 	@echo ""
 	@echo "Application Execution (Local):"
 	@echo "  make app-up              Start the local web app (api + celery worker + redis + frontend)"

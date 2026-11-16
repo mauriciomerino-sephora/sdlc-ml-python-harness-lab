@@ -4,6 +4,7 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
 from sqlmodel import Session, SQLModel, create_engine
 
 from harness_lab_app.case_service import CaseService
@@ -62,27 +63,28 @@ def test_run_pytest_parses_status_first_lines(monkeypatch):
     assert parsed["per_test"]["tests/test_config.py::test_b"] is False
 
 
-def test_evaluate_resolved_logic(monkeypatch):
-    per = {"f1": True, "p1": True, "p2": True}
-
+@pytest.mark.parametrize(
+    ("per", "resolved", "f2p_passed", "p2p_passed"),
+    [
+        ({"f1": True, "p1": True, "p2": True}, True, 1, 2),
+        ({"f1": False, "p1": True, "p2": True}, False, 0, 2),
+        ({"f1": True, "p1": True, "p2": False}, False, 1, 1),
+        ({"f1": True, "p1": True}, False, 1, 1),
+        ({"p1": True, "p2": True}, False, 0, 2),
+    ],
+)
+def test_evaluate_requires_every_fix_and_regression_result(
+    monkeypatch, per, resolved, f2p_passed, p2p_passed
+):
     monkeypatch.setattr(
         swebench_common,
         "run_pytest",
         lambda *_a, **_k: {"per_test": per, "raw": "", "passed": 3, "failed": 0},
     )
     result = swebench_common.evaluate(Path("."), "python", ["f1"], ["p1", "p2"])
-    assert result["resolved"] is True
-    assert result["f2p_passed"] == 1
-    assert result["p2p_passed"] == 2
-
-    per2 = {"f1": False, "p1": True, "p2": True}
-    monkeypatch.setattr(
-        swebench_common,
-        "run_pytest",
-        lambda *_a, **_k: {"per_test": per2, "raw": "", "passed": 2, "failed": 1},
-    )
-    result2 = swebench_common.evaluate(Path("."), "python", ["f1"], ["p1", "p2"])
-    assert result2["resolved"] is False
+    assert result["resolved"] is resolved
+    assert result["f2p_passed"] == f2p_passed
+    assert result["p2p_passed"] == p2p_passed
 
 
 def _spec() -> dict:

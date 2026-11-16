@@ -125,6 +125,21 @@ def test_atomic_write_leaves_no_temp(tmp_path: Path) -> None:
     assert [x.name for x in target.parent.iterdir()] == ["file.yaml"]
 
 
+def test_failed_atomic_replace_keeps_previous_manifest(tmp_path, monkeypatch):
+    target = tmp_path / "file.yaml"
+    target.write_text("version: old\n")
+
+    def fail_replace(source, destination):
+        raise OSError("simulated replacement failure")
+
+    monkeypatch.setattr(manifests.os, "replace", fail_replace)
+    with pytest.raises(OSError, match="simulated replacement failure"):
+        manifests.atomic_write_text(target, "version: new\n")
+
+    assert target.read_text() == "version: old\n"
+    assert [p.name for p in tmp_path.iterdir()] == ["file.yaml"]
+
+
 # --------------------------------------------------------------------------- #
 # ID allocation
 # --------------------------------------------------------------------------- #

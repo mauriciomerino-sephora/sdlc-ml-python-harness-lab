@@ -103,6 +103,23 @@ def test_write_is_owner_only(tmp_path):
     assert stat.S_IMODE(os.stat(path).st_mode) == 0o600
 
 
+def test_failed_replacement_preserves_original_and_removes_temporary_file(
+    tmp_path, monkeypatch
+):
+    path = tmp_path / ".env"
+    path.write_text(SAMPLE)
+
+    def fail_replace(source, destination):
+        raise OSError("simulated replacement failure")
+
+    monkeypatch.setattr(os, "replace", fail_replace)
+    with pytest.raises(OSError, match="simulated replacement failure"):
+        write_env(path, {"GATEWAY_TOKEN": "synthetic-new-value"}, tmp_path / "backups")
+
+    assert path.read_text() == SAMPLE
+    assert list(tmp_path.glob(".env.*.tmp")) == []
+
+
 def test_write_backs_up_the_previous_content(tmp_path):
     path = tmp_path / ".env"
     path.write_text(SAMPLE)

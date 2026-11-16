@@ -93,6 +93,16 @@ make install        # Python 3.11 + dependencies (uv)
 make ci             # the read-only gate: lint, types, tests, skill sync, frontend
 ```
 
+Install local commit, commit-message and push hooks with `make setup-hooks`.
+Commits and pushes then require the full `make ci` gate to pass. For focused work,
+`make test-unit` selects tests without the integration marker and
+`make test-integration` selects marked integration tests; `make test` runs both
+with coverage and propagates failures. These commands do not format source.
+See [development hooks](docs/development-hooks.md) for setup and scope; live
+Docker/model-server smoke tests remain separate.
+The [testing audit](docs/testing-audit.md) records the new test-quality skill,
+the defects its first application exposed, and follow-up work.
+
 The lab is built on its own template: its working loop (Ground → Plan → Delegate →
 Verify → Compound), skills and governance are in [`.github/`](.github/) and
 [agentic workflow](docs/agentic-workflow.md). Decisions are recorded as

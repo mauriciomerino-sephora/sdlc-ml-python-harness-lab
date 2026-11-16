@@ -77,7 +77,7 @@ def test_speed_tests_rank_fastest_first_and_name_their_machine(session):
 
 def test_case_runs_group_by_model_and_rank_by_test_pass_rate(session):
     _run(session, "a1", "lmstudio/prism-ml/bonsai-27b", checks=(True, False))
-    _run(session, "a2", "lmstudio/prism-ml/bonsai-27b", checks=(True, True))
+    _run(session, "a2", "lmstudio/prism-ml/bonsai-27b", checks=(True, True), minutes=40)
     _run(session, "b1", "lmstudio/qwen/qwen3.6-27b", checks=(True, True), minutes=40)
     _run(session, "c1", "claude-opus-5-5", checks=(True, True))  # cloud: excluded
     cases = local_results(session)["cases"]
@@ -88,7 +88,7 @@ def test_case_runs_group_by_model_and_rank_by_test_pass_rate(session):
     bonsai = cases[1]
     assert bonsai["runs"] == 2 and bonsai["passed_runs"] == 1
     assert bonsai["test_pass_rate"] == 0.75
-    assert bonsai["median_minutes"] == 20
+    assert bonsai["median_minutes"] == 30
 
 
 def test_case_runs_keep_each_arm_apart(session):

@@ -49,6 +49,7 @@ Default internal skills bundled by template:
 - `create_domain_contract`
 - `create_mle_agent_package`
 - `generate_e2e_tests`
+- `sensible_testing`
 - `generate_implementation_docs`
 - `refactor_to_clean_architecture`
 - `validate_module_structure`
@@ -58,6 +59,23 @@ Default internal skills bundled by template:
 - `retrospective`
 - `systematic_debugging`
 - `verify_changes`
+
+## Testing skill routing
+
+Keep the testing skills complementary:
+
+- `test-driven-development` retains the existing test-first implementation loop.
+- `generate_e2e_tests` designs critical flows and now reuses `sensible_testing`
+  for assertions, failure cases, and boundary isolation.
+- `sensible_testing` audits whether tests and benchmark graders detect plausible
+  defects, using independent oracles and selective mutation probes. Its domain
+  catalogue covers application services, frontend/3D, data/ML, mathematical and
+  factual evaluation, simulations, model serving, and privacy boundaries.
+
+The tester agent uses both internal skills. The quality-audit skill is one
+self-contained governed file, so native copy projections and single-skill
+exports preserve its domain guidance. See the [testing audit](testing-audit.md)
+for the initial application and its limits.
 
 ## Ideation routing: `brainstorm_quick` vs external `brainstorming`
 

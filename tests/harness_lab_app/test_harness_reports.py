@@ -86,6 +86,8 @@ def test_render_markdown() -> None:
 
 def test_build_attestation_is_sanitized() -> None:
     report = _report(passing=True)
+    for arm in ("baseline", "candidate"):
+        report["metrics"][arm]["operator_note"] = "INTERNAL_NOTE_SENTINEL"
     attestation = reports.build_attestation(
         report,
         version="0.3.0",
@@ -98,9 +100,17 @@ def test_build_attestation_is_sanitized() -> None:
     # Only name+passed for gates — no private detail leaks.
     assert all(set(g) == {"name", "passed"} for g in attestation["gates"])
     # Aggregate metrics are the allowlisted keys only.
-    assert "median_tokens" in attestation["aggregate_metrics"]["candidate"]
-    # The serialized attestation carries no secrets/paths.
-    assert "pass_ratio" in json.dumps(attestation)
+    expected_keys = {
+        "pass_ratio",
+        "median_tokens",
+        "median_cost",
+        "median_duration",
+        "median_steps",
+        "median_composite",
+    }
+    for arm in ("baseline", "candidate"):
+        assert set(attestation["aggregate_metrics"][arm]) == expected_keys
+    assert "INTERNAL_NOTE_SENTINEL" not in json.dumps(attestation)
 
 
 def test_write_report_creates_files(tmp_path: Path) -> None:

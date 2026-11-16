@@ -40,6 +40,7 @@ make setup-opencode-skills
 - `create_domain_contract`
 - `create_mle_agent_package`
 - `generate_e2e_tests`
+- `sensible_testing`
 - `generate_implementation_docs`
 - `refactor_to_clean_architecture`
 - `validate_module_structure`

@@ -12,6 +12,7 @@ import pytest
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
+pytestmark = pytest.mark.integration
 
 
 def subprocess_env() -> dict[str, str]:
@@ -56,10 +57,11 @@ def run_make(project: Path, target: str, **env: str) -> subprocess.CompletedProc
 
 
 @pytest.mark.parametrize("exit_code", [1, 2, 5])
-def test_test_target_refuses_failures_collection_errors_and_no_tests(
-    project: Path, exit_code: int
+@pytest.mark.parametrize("target", ["test", "test-unit", "test-integration"])
+def test_test_targets_refuse_failures_collection_errors_and_no_tests(
+    project: Path, target: str, exit_code: int
 ) -> None:
-    result = run_make(project, "test", PYTEST_EXIT=str(exit_code))
+    result = run_make(project, target, PYTEST_EXIT=str(exit_code))
     assert result.returncode != 0, result.stdout + result.stderr
     assert "Tests completed!" not in result.stdout
 
@@ -70,6 +72,21 @@ def test_test_target_runs_the_full_suite_without_formatting(project: Path) -> No
     calls = (project / "calls").read_text().splitlines()
     assert len(calls) == 1, calls
     assert calls[0].startswith("pytest tests/ --cov=src ")
+
+
+@pytest.mark.parametrize(
+    ("target", "selection"),
+    [("test-unit", "-m not integration"), ("test-integration", "-m integration")],
+)
+def test_named_test_targets_select_the_intended_partition(
+    project: Path, target: str, selection: str
+) -> None:
+    result = run_make(project, target)
+    assert result.returncode == 0, result.stdout + result.stderr
+    calls = (project / "calls").read_text().splitlines()
+    assert len(calls) == 1, calls
+    assert calls[0].startswith("pytest tests/ ")
+    assert selection in calls[0]
 
 
 def test_setup_installs_commit_message_commit_and_push_hooks(project: Path) -> None:
@@ -116,7 +133,6 @@ def test_gate_clears_git_repository_context_before_running_checks(
     assert (tmp_path / "calls").read_text().splitlines() == ["ci"]
 
 
-@pytest.mark.integration
 @pytest.mark.parametrize("stage", ["pre-commit", "pre-push"])
 @pytest.mark.parametrize("exit_code", [0, 1])
 @pytest.mark.parametrize("caller_context", ["clean", "git-hook"])
