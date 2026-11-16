@@ -24,9 +24,23 @@ This file defines Level 3 enforcement so quality does not depend on model behavi
 
 - `make check` — read-only quality gate (use in CI).
 - `make check-sync` — skill-sync drift gate (use in CI).
-- `make ci` — full read-only pipeline (`check` + `check-sync`).
+- `make ci` — full read-only pipeline (`check` + `check-sync` + `check-frontend`).
 - `make format` / `make fix` — local-only, mutate the tree.
-- `make lint` / `make test` — local helpers (mutating variants).
+- `make test` — all automated tests with coverage; propagates pytest failures and
+  does not format or fix source files.
+- `make lint` — local helper (reports Bandit findings without failing the target).
+
+## Local Git Gates
+
+`make setup-hooks` installs `pre-commit`, `commit-msg`, and `pre-push` hooks.
+The local quality hook runs `make ci` before commits and pushes, including the
+complete Python test suite, skill-sync checks, and frontend type/build checks.
+It runs even for documentation-only changes and propagates a failed gate.
+Formatting and autofix hooks remain local developer conveniences.
+
+Local Git hooks can be bypassed or removed; they supplement required CI checks,
+not replace them. Docker/model smoke tests are separate operational checks and
+are not implied by a passing unit/service-integration suite.
 
 ## Implementation Notes
 

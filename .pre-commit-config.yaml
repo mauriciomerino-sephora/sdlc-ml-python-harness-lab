@@ -36,6 +36,13 @@ repos:
   # Runs at the commit-msg stage, which `make setup-hooks` installs.
   - repo: local
     hooks:
+      - id: local-quality-gate
+        name: full local quality gate (including unit and integration tests)
+        entry: sh scripts/check_local_quality.sh
+        language: system
+        stages: [pre-commit, pre-push]
+        always_run: true
+        pass_filenames: false
       - id: commit-authorship
         name: commit authored by the developer, not an AI agent
         entry: python3 scripts/check_commit_authorship.py
