@@ -36,7 +36,9 @@ This file defines Level 3 enforcement so quality does not depend on model behavi
 The local quality hook runs `make ci` before commits and pushes, including the
 complete Python test suite, skill-sync checks, and frontend type/build checks.
 It runs even for documentation-only changes and propagates a failed gate.
-Formatting and autofix hooks remain local developer conveniences.
+Formatting and autofix hooks run only at commit time; push checks do not edit
+source files. This prevents a first branch push from rewriting unrelated
+benchmarks, fixtures, or vendored skills while checking the branch's history.
 
 Local Git hooks can be bypassed or removed; they supplement required CI checks,
 not replace them. Docker/model smoke tests are separate operational checks and

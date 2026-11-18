@@ -28,6 +28,7 @@ end-to-end skill and tester agent reuse the new quality guidance.
 | Local test command | Pytest errors became success; tests implicitly ran autofix | Propagate failures and keep formatting explicit |
 | Git gates | No mandatory full test gate or installed push stage | Run full CI at commit and push; preserve authorship and existing hooks |
 | Hook isolation | Git repository/index overrides could redirect nested test repositories | Clear Git-local variables before running the gate and test contaminated contexts |
+| Push behavior | Formatting hooks rewrote existing files during a new branch push | Confine source-editing hooks to commits; exercise stage routing through the real runner |
 | Test selection | Unit target ran everything; no integration target | Explicit marker-based unit/integration targets; full gate still runs both |
 | Provenance | A file hash was compared only with itself | Assert a known digest and sensitivity to changed file bytes |
 | Skill projection | A truncated file beginning with YAML sentinels passed | Compare projected bytes with the source payload |
@@ -77,6 +78,15 @@ On the completed change, `make test-unit` passed 2,856 selected cases and
 formatting, lint, security, type checking, generated-skill synchronization, and
 the frontend type check and production build. Existing deprecation warnings and
 the frontend bundle-size warning remain; neither is a failed check.
+
+### Push-stage regression (2026-11-18)
+
+A subsequent real push exposed source-editing hooks running at the push stage,
+which changed existing content and broke integrity checks. Those edits were
+restored. Ten regression cases reproduce the routing problem and verify that
+all five source-editing hooks remain active at commit time and inactive at push
+time. The integration selection now passes 50 cases, including those ten stage
+regressions. The complete gate remains mandatory at commit and push.
 
 ## Remaining work
 

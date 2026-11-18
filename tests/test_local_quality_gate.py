@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import shlex
 import shutil
 import subprocess
 import sys
@@ -207,3 +208,58 @@ def test_real_hook_runner_propagates_the_full_quality_gate(
         result.stdout + result.stderr
     )
     assert (result.returncode == 0) == (exit_code == 0), result.stdout + result.stderr
+
+
+@pytest.mark.parametrize(
+    "hook_id",
+    ["trailing-whitespace", "end-of-file-fixer", "ruff", "ruff-format", "nbstripout"],
+)
+@pytest.mark.parametrize("stage", ["pre-commit", "pre-push"])
+def test_source_editing_hooks_are_confined_to_the_commit_stage(
+    tmp_path: Path, hook_id: str, stage: str
+) -> None:
+    configuration = yaml.safe_load((ROOT / ".pre-commit-config.yaml").read_text())
+    configured_hook = next(
+        hook
+        for repo in configuration["repos"]
+        for hook in repo["hooks"]
+        if hook["id"] == hook_id
+    )
+    # Keep the real stage configuration and replace only the formatter I/O.
+    # Always run the controlled action so untracked test input cannot hide it.
+    hook = {
+        "id": hook_id,
+        "name": "formatter stage control",
+        "language": "system",
+        "entry": shlex.join([sys.executable, "mutate.py"]),
+        "always_run": True,
+        "pass_filenames": False,
+    }
+    if "stages" in configured_hook:
+        hook["stages"] = configured_hook["stages"]
+    (tmp_path / ".pre-commit-config.yaml").write_text(
+        yaml.safe_dump({"repos": [{"repo": "local", "hooks": [hook]}]})
+    )
+    (tmp_path / "mutate.py").write_text(
+        'from pathlib import Path\nPath("formatted").write_text("changed")\n'
+    )
+    env = subprocess_env()
+    subprocess.run(["git", "init", "--quiet", str(tmp_path)], env=env, check=True)
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "pre_commit",
+            "run",
+            "--hook-stage",
+            stage,
+            "--all-files",
+        ],
+        cwd=tmp_path,
+        env={**env, "PRE_COMMIT_HOME": str(tmp_path / "cache")},
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert (tmp_path / "formatted").exists() == (stage == "pre-commit")

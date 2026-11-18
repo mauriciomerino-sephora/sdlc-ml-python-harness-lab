@@ -30,8 +30,11 @@ Live Docker, model-server, and paid-inference smoke tests are separate and are
 not run by these hooks.
 
 Existing whitespace, formatting, notebook, and secret-scanning hooks remain in
-place. Formatting hooks may edit files locally; review and stage those changes
-before retrying. The commit-message hook enforces developer authorship.
+place. Source-editing hooks run only at `pre-commit`; review and stage their
+changes before retrying. They do not run during `pre-push`, which must not rewrite
+the files being published. Read-only checks, including secret scanning and the
+complete quality gate, still run during push. The commit-message hook enforces
+developer authorship.
 
 ## Running checks directly
 
